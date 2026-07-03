@@ -62,3 +62,11 @@ integration test).
 Balance knobs all live in `shared/constants.ts`. Bump `PROTO_VERSION` there
 whenever the protocol or game rules change — mismatched (cached) clients get
 told to hard-refresh instead of desyncing.
+
+## Contributing
+
+Issues and PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+[MIT](LICENSE)

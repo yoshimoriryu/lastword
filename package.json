@@ -2,7 +2,7 @@
   "name": "lastword",
   "private": true,
   "version": "0.1.0",
-  "description": "LAN typing battle royale — last one standing gets the last word",
+  "description": "LAN typing battle royale \u2014 last one standing gets the last word",
   "scripts": {
     "build": "esbuild client/main.ts --bundle --outfile=client/bundle.js --format=iife && esbuild server/index.ts --bundle --platform=node --packages=external --outfile=dist/server.cjs",
     "start": "npm run build && node dist/server.cjs",
@@ -17,5 +17,6 @@
     "@types/ws": "^8.5.12",
     "esbuild": "^0.24.0",
     "typescript": "^5.6.0"
-  }
+  },
+  "license": "MIT"
 }
