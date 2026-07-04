@@ -263,6 +263,11 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") helpOverlay.classList.add("hidden");
     return; // reading the manual pauses your fingers, not the game
   }
+  if (e.key === "Escape" && (lastState?.phase === "playing" || lastState?.phase === "countdown")) {
+    e.preventDefault();
+    send({ t: "abort" }); // server allows only when no other humans in room
+    return;
+  }
   if (!lastState || lastState.phase !== "playing") return;
   if (document.activeElement === nameInput) return;
   if ((e.metaKey || e.ctrlKey || e.altKey) && e.key !== "Backspace") return;

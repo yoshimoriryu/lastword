@@ -82,7 +82,8 @@ export type ClientMsg =
   | { t: "toLobby" }
   | { t: "addBot"; level: BotLevel | "custom"; wpm?: number } // host, lobby only
   | { t: "removeBot"; id: string } // host, lobby only
-  | { t: "setOpt"; maxStack: number }; // host, lobby only
+  | { t: "setOpt"; maxStack: number } // host, lobby only
+  | { t: "abort" }; // end round early — server allows only when no other humans
 
 export type EvKind =
   | "clear" // p cleared a word (n = attack sent)

@@ -200,7 +200,36 @@ export class Game {
           this.markDirty();
         }
         break;
+      case "abort":
+        this.abortRound(id);
+        break;
     }
+  }
+
+  /** Esc: end the round early — only when the requester is the lone human
+   *  (solo practice / vs bots), never in a multiplayer match */
+  private abortRound(id: string): void {
+    const p = this.players.get(id);
+    if (!p || p.bot) return;
+    const humans = [...this.players.values()].filter((q) => q.connected && !q.bot);
+    if (humans.length > 1) return;
+    if (this.phase === "countdown") {
+      this.resetToLobby();
+      return;
+    }
+    if (this.phase !== "playing") return;
+    const now = this.now();
+    const alive = [...this.players.values()]
+      .filter((q) => q.alive)
+      .sort((a, b) => b.wordsCleared - a.wordsCleared);
+    alive.forEach((q, i) => {
+      q.placement = i + 1;
+      q.alive = false;
+      q.diedAt = now;
+    });
+    this.phase = "over";
+    this.results = this.buildResults(now);
+    this.markDirty();
   }
 
   // ---- bots -----------------------------------------------------------------
