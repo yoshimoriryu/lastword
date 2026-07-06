@@ -48,7 +48,7 @@
       charges (max <span id="help-surgemax"></span>). When your streak breaks —
       typo or idling — the whole charge fires at your opponents as one burst.
       Big combo, big bomb.</p>
-      <p>Or press <b>enter</b> to fire it manually: perfect timing, no accuracy
+      <p class="help-manual">Or press <b>enter</b> to fire it manually: perfect timing, no accuracy
       hit — but it resets your streak, same as a break. Hold for a bigger bomb
       or dump it while your opponent is already drowning; your call.</p>
 
@@ -56,6 +56,11 @@
       <p>Incoming attacks telegraph for <span id="help-delay"></span>s on the
       red gauge beside your board before landing. Attack you send during that
       window <b>cancels incoming words first</b> — keep typing under fire.</p>
+
+      <h3>modes</h3>
+      <p><b>surge</b> — everything above. <b>auto-surge</b> — surge fires only
+      on streak break, no manual enter. <b>classic</b> — no surge at all;
+      combos multiply harder instead (up to ×2.5). Host picks in the lobby.</p>
 
       <h3>pace</h3>
       <p>The neutral word stream speeds up forever. Nobody outlives it —
@@ -85,6 +90,13 @@
       <p class="sub">friends join at <span id="lobby-addr" class="accent"></span> with this room code</p>
       <ul id="lobby-players"></ul>
       <div id="opt-row">
+        <span class="hint">mode:</span>
+        <select id="opt-mode">
+          <option value="surge" selected>surge — meter + manual fire</option>
+          <option value="auto-surge">auto-surge — no manual fire</option>
+          <option value="classic">classic — no surge, big combos</option>
+        </select>
+        <span id="opt-mode-view" class="hint hidden"></span>
         <span class="hint">life:</span>
         <select id="opt-life">
           <option value="8">8 — sudden death</option>
@@ -163,7 +175,7 @@
     <span><b>space</b> commit word</span>
     <span><b>⌫</b> fix typo</span>
     <span><b>⌘⌫</b> wipe word</span>
-    <span><b>⏎</b> fire surge ⚡</span>
+    <span id="key-enter"><b>⏎</b> fire surge ⚡</span>
     <span><b>esc</b> end round (vs bots)</span>
   </footer>
 

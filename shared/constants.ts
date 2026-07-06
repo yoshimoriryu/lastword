@@ -6,7 +6,7 @@ export const MAX_PLAYERS = 6;
 
 /** Bump when client/server protocol or game rules change — mismatched
  *  (usually cached) clients are told to hard-refresh instead of desyncing. */
-export const PROTO_VERSION = 5;
+export const PROTO_VERSION = 6;
 
 export const MAX_ROOMS = 16;
 
@@ -39,9 +39,29 @@ export const SURGE_MIN_STREAK = 3;
 /** Surge meter cap — a full meter is one brutal burst, not an instakill. */
 export const SURGE_MAX = 12;
 
-/** Combo multiplier: 1 + STEP * min(streak, CAP). */
+/** Combo multiplier: 1 + STEP * min(streak, CAP). Defaults; modes override. */
 export const COMBO_STEP = 0.08;
 export const COMBO_CAP = 10;
+
+/** Game modes — data-driven ruleset table. Adding a mode = adding an entry. */
+export interface ModeRules {
+  /** surge meter exists and fires on streak break */
+  surge: boolean;
+  /** Enter fires the surge manually */
+  manualFire: boolean;
+  comboStep: number;
+  comboCap: number;
+}
+
+export const MODES = {
+  surge: { surge: true, manualFire: true, comboStep: COMBO_STEP, comboCap: COMBO_CAP },
+  "auto-surge": { surge: true, manualFire: false, comboStep: COMBO_STEP, comboCap: COMBO_CAP },
+  // no surge — bigger combo ceiling rewards consistency instead (x2.5 at x15)
+  classic: { surge: false, manualFire: false, comboStep: 0.1, comboCap: 15 },
+} as const satisfies Record<string, ModeRules>;
+
+export type ModeId = keyof typeof MODES;
+export const DEFAULT_MODE: ModeId = "surge";
 
 export const COUNTDOWN_MS = 3000;
 export const TICK_MS = 50;
@@ -67,8 +87,10 @@ export function attackValue(wordLen: number, tookMs: number): number {
   return wordLen / 14 + speedBonus;
 }
 
-export function comboMult(streak: number): number {
-  return 1 + COMBO_STEP * Math.min(streak, COMBO_CAP);
+export function comboMult(streak: number, rules?: ModeRules): number {
+  const step = rules?.comboStep ?? COMBO_STEP;
+  const cap = rules?.comboCap ?? COMBO_CAP;
+  return 1 + step * Math.min(streak, cap);
 }
 
 export function neutralIntervalMs(elapsedS: number): number {

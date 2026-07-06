@@ -58,6 +58,8 @@ export interface StateSnap {
   hostId: string;
   /** room option: stack size that kills (a.k.a. life) */
   maxStack: number;
+  /** room option: game mode id (key into MODES) */
+  mode: string;
   players: PlayerSnap[];
   /** ms since round start (playing/over) */
   elapsed: number;
@@ -82,7 +84,7 @@ export type ClientMsg =
   | { t: "toLobby" }
   | { t: "addBot"; level: BotLevel | "custom"; wpm?: number } // host, lobby only
   | { t: "removeBot"; id: string } // host, lobby only
-  | { t: "setOpt"; maxStack: number } // host, lobby only
+  | { t: "setOpt"; maxStack?: number; mode?: string } // host, lobby only
   | { t: "abort" }; // end round early — server allows only when no other humans
 
 export type EvKind =

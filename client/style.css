@@ -430,3 +430,7 @@ body.hitflash #stack { box-shadow: 0 0 0 3px var(--err) inset; }
 #results-table th, #results-table td { padding: 0.5rem 1.1rem; text-align: left; }
 #results-table th { color: var(--sub); font-weight: 400; border-bottom: 1px solid var(--sub); }
 #results-table tr.first td { color: var(--accent); font-weight: 700; }
+
+/* mode-adaptive UI: classic hides the surge meter, non-manual hides the ⏎ hint */
+body.no-surge #surge-wrap { visibility: hidden; }
+body.no-manual #key-enter, body.no-manual .help-manual { display: none; }

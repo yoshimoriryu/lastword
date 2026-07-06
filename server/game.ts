@@ -5,8 +5,11 @@ import {
   BOT_PRESETS,
   comboMult,
   COUNTDOWN_MS,
+  DEFAULT_MODE,
   MAX_PLAYERS,
   MAX_STACK,
+  MODES,
+  type ModeId,
   neutralIntervalMs,
   STACK_MIN,
   STREAK_GAP_MS,
@@ -97,6 +100,9 @@ export class Game {
 
   /** room option: stack size that kills — host-adjustable in lobby */
   private maxStack = MAX_STACK;
+  /** room option: game mode — rules read from the MODES table */
+  private mode: ModeId = DEFAULT_MODE;
+  private get rules() { return MODES[this.mode]; }
 
   private tickTimer: ReturnType<typeof setInterval>;
 
@@ -195,8 +201,11 @@ export class Game {
         this.removeBot(id, msg.id);
         break;
       case "setOpt":
-        if (this.phase === "lobby" && id === this.hostId && Number.isFinite(msg.maxStack)) {
-          this.maxStack = Math.min(30, Math.max(6, Math.round(msg.maxStack)));
+        if (this.phase === "lobby" && id === this.hostId) {
+          if (Number.isFinite(msg.maxStack)) {
+            this.maxStack = Math.min(30, Math.max(6, Math.round(msg.maxStack!)));
+          }
+          if (msg.mode && msg.mode in MODES) this.mode = msg.mode as ModeId;
           this.markDirty();
         }
         break;
@@ -394,7 +403,7 @@ export class Game {
     if (k === "Enter") {
       // manual surge release: fire the banked burst at a moment of your
       // choosing — costs the streak, same as a break, but no accuracy hit
-      if (p.surge > 0) {
+      if (this.rules.manualFire && p.surge > 0) {
         this.breakStreak(p, now, false);
         this.markDirty();
       }
@@ -452,11 +461,11 @@ export class Game {
     p.streak = now - p.lastClear <= STREAK_GAP_MS ? p.streak + 1 : 1;
     p.maxStreak = Math.max(p.maxStreak, p.streak);
     p.lastClear = now;
-    if (p.streak >= SURGE_MIN_STREAK) {
+    if (this.rules.surge && p.streak >= SURGE_MIN_STREAK) {
       p.surge = Math.min(SURGE_MAX, p.surge + surgeGain(p.streak));
     }
 
-    p.attackAcc += attackValue(word.text.length, took) * comboMult(p.streak);
+    p.attackAcc += attackValue(word.text.length, took) * comboMult(p.streak, this.rules);
     const attack = Math.floor(p.attackAcc);
     if (attack > 0) {
       p.attackAcc -= attack;
@@ -632,6 +641,7 @@ export class Game {
       phase: this.phase,
       hostId: this.hostId,
       maxStack: this.maxStack,
+      mode: this.mode,
       players,
       elapsed: this.phase === "playing" || this.phase === "over" ? now - this.startedAt : 0,
       countdown: this.phase === "countdown" ? Math.max(0, this.countdownEndsAt - now) : undefined,

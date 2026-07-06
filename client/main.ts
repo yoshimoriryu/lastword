@@ -3,6 +3,7 @@ import {
   attackValue,
   BASELINE_MS_PER_CHAR,
   comboMult,
+  MODES,
   NEUTRAL_MIN_INTERVAL_MS,
   NEUTRAL_START_INTERVAL_MS,
   neutralIntervalMs,
@@ -72,6 +73,7 @@ const ws = new WebSocket(`ws://${location.host}`);
 let myId = "";
 let lastState: StateSnap | null = null;
 let roomMax = 16; // room life option, synced from every snapshot
+let roomMode: keyof typeof MODES = "surge"; // room mode, synced from every snapshot
 
 // Local prediction of own typing. Rendering only after the server echo makes
 // fast typing feel laggy, so we simulate our own keystrokes instantly; the
@@ -221,6 +223,8 @@ botWpmInput.onkeydown = (e) => {
 };
 const lifeSelect = $<HTMLSelectElement>("#opt-life");
 lifeSelect.onchange = () => send({ t: "setOpt", maxStack: Number(lifeSelect.value) });
+const modeSelect = $<HTMLSelectElement>("#opt-mode");
+modeSelect.onchange = () => send({ t: "setOpt", mode: modeSelect.value });
 
 // ---- help overlay -------------------------------------------------------------
 
@@ -289,7 +293,9 @@ document.addEventListener("keydown", (e) => {
   }
   if (e.key === "Enter") {
     e.preventDefault();
-    send({ t: "key", k: "Enter" }); // manual surge fire — server checks charge
+    if (MODES[roomMode].manualFire) {
+      send({ t: "key", k: "Enter" }); // manual surge fire — server checks charge
+    }
     return;
   }
   if (e.key === " ") {
@@ -370,6 +376,9 @@ let prevPhase = "";
 
 function render(s: StateSnap): void {
   roomMax = s.maxStack || 16;
+  roomMode = (s.mode in MODES ? s.mode : "surge") as keyof typeof MODES;
+  document.body.classList.toggle("no-surge", !MODES[roomMode].surge);
+  document.body.classList.toggle("no-manual", !MODES[roomMode].manualFire);
   const me = s.players.find((p) => p.id === myId);
 
   // reset prediction outside rounds AND on the transition into one — rendering
@@ -429,6 +438,13 @@ function renderLobby(s: StateSnap): void {
   lifeView.textContent = `${s.maxStack} words`;
   if (isHost && document.activeElement !== lifeSelect && lifeSelect.value !== String(s.maxStack)) {
     lifeSelect.value = String(s.maxStack);
+  }
+  modeSelect.classList.toggle("hidden", !isHost);
+  const modeView = $("#opt-mode-view");
+  modeView.classList.toggle("hidden", isHost);
+  modeView.textContent = s.mode;
+  if (isHost && document.activeElement !== modeSelect && modeSelect.value !== s.mode) {
+    modeSelect.value = s.mode;
   }
   const readyBtn = $("#ready-btn");
   readyBtn.textContent = amReady ? "unready" : "ready";
@@ -543,7 +559,7 @@ function renderOwnBoard(me: PlayerSnap): void {
   $("#combo").textContent = me.streak >= 2 ? `x${me.streak}` : "";
   const fill = $("#surge-fill");
   fill.style.width = `${Math.min(100, (me.surge / SURGE_MAX) * 100)}%`;
-  $("#surge-num").textContent = me.surge > 0 ? `⚡${me.surge} ⏎` : "";
+  $("#surge-num").textContent = me.surge > 0 ? (MODES[roomMode].manualFire ? `⚡${me.surge} ⏎` : `⚡${me.surge}`) : "";
 }
 
 function renderActiveWord(word: string, typed: string): DocumentFragment {
