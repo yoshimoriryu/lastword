@@ -6,7 +6,7 @@ export const MAX_PLAYERS = 6;
 
 /** Bump when client/server protocol or game rules change — mismatched
  *  (usually cached) clients are told to hard-refresh instead of desyncing. */
-export const PROTO_VERSION = 6;
+export const PROTO_VERSION = 7;
 
 export const MAX_ROOMS = 16;
 
@@ -20,9 +20,10 @@ export const MAX_STACK = 16;
 export const STACK_MIN = 5;
 
 /** Neutral stream: interval(t) = max(MIN, START * e^(-t/TAU)) — t in seconds. */
-export const NEUTRAL_START_INTERVAL_MS = 3500;
-export const NEUTRAL_MIN_INTERVAL_MS = 800;
-export const NEUTRAL_RAMP_TAU_S = 80;
+export const NEUTRAL_START_INTERVAL_MS = 3000;
+/** 300ms/word = ~200wpm just to keep up — the stream WILL end the match */
+export const NEUTRAL_MIN_INTERVAL_MS = 300;
+export const NEUTRAL_RAMP_TAU_S = 40;
 
 /** Incoming attack words telegraph for this long before landing (counter window). */
 export const ATTACK_LAND_DELAY_MS = 2000;
