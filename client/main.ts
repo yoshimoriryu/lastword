@@ -214,12 +214,12 @@ botWpmInput.onkeydown = (e) => {
   const wpm = Number(botWpmInput.value);
   if (!wpm || wpm < 10 || wpm > 300) {
     botWpmInput.value = "";
-    botWpmInput.placeholder = "10-300 ⏎";
+    botWpmInput.placeholder = "10-300 only, press ⏎";
     return;
   }
   send({ t: "addBot", level: "custom", wpm });
   botWpmInput.value = "";
-  botWpmInput.placeholder = "type wpm ⏎";
+  botWpmInput.placeholder = "wpm, press ⏎";
 };
 const lifeSelect = $<HTMLSelectElement>("#opt-life");
 lifeSelect.onchange = () => send({ t: "setOpt", maxStack: Number(lifeSelect.value) });
